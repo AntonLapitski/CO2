@@ -1,0 +1,31 @@
+version: "2.1"
+services:
+  web:
+    container_name: web
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8090:80"
+    volumes:
+      - ../app:/app
+    links:
+      - mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env-dev
+
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    ports:
+      - "33306:3306"
+    env_file:
+      - .env-dev
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
